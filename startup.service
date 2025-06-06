@@ -1,0 +1,10 @@
+[Unit]
+Description=run my startup script
+After=network.target
+
+[Service]
+ExecStart=/home/pi/Desktop/99Ping/startup.sh
+User=pi
+
+[Install]
+WantedBy=multi-user.target

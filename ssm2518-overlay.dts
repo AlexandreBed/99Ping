@@ -1,0 +1,110 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2712/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/sound/soc.h>
+
+/ {
+    compatible = "brcm,bcm2712";
+
+    fragment@0 {
+        target = <&i2s>;
+        __overlay__ {
+            status = "okay";
+        };
+    };
+
+    fragment@1 {
+        target = <&i2c0>;  // or &i2c1 depending on your wiring
+        __overlay__ {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            ssm2518: ssm2518@34 {
+                compatible = "adi,ssm2518";
+                reg = <0x34>; // Address
+                #sound-dai-cells = <0>;
+
+                clocks = <&clk_osc>;  // Replace if using another clock
+                clock-names = "mclk";
+
+                // Optional: mute pin or reset pin if you use one
+                // mute-gpios = <&gpio 25 GPIO_ACTIVE_LOW>;
+                // reset-gpios = <&gpio 24 GPIO_ACTIVE_HIGH>;
+            };
+        };
+    };
+
+    fragment@2 {
+        target-path = "/";
+        __overlay__ {
+            ssm2518_audio: sound {
+                compatible = "simple-audio-card";
+                simple-audio-card,name = "SSM2518-Audio";
+                simple-audio-card,format = "i2s";
+                simple-audio-card,bitclock-master = <&dailink0_master>;
+                simple-audio-card,frame-master = <&dailink0_master>;
+                simple-audio-card,widgets =
+                    "Speaker", "Speaker";
+                simple-audio-card,routing =
+                    "Speaker", "SSM2518 OUT";
+
+                simple-audio-card,cpu {
+                    sound-dai = <&i2s>;
+                };
+
+                dailink0_master: simple-audio-card,codec {
+                    sound-dai = <&ssm2518>;
+                };
+            };
+        };
+    };
+};
+";
+
+    fragment@0 {
+        target = <&i2s>;
+        __overlay__ {
+            status = "okay";
+        };
+    };
+
+    fragment@1 {
+        target = <&sound>;
+        __overlay__ {
+            compatible = "simple-audio-card";
+            simple-audio-card,name = "SSM2518";
+
+            simple-audio-card,format = "i2s";
+            simple-audio-card,bitclock-master = <&dailink0_master>;
+            simple-audio-card,frame-master = <&dailink0_master>;
+
+            simple-audio-card,cpu {
+                sound-dai = <&i2s>;
+            };
+
+            dailink0_master: simple-audio-card,codec {
+                sound-dai = <&ssm2518>;
+            };
+        };
+    };
+
+    fragment@2 {
+        target-path = "/";
+        __overlay__ {
+            ssm2518: ssm2518@34 {
+                #sound-dai-cells = <0>;
+                compatible = "adi,ssm2518";
+                reg = <0x34>; // I2C address
+                adi,left-output-enable;
+                adi,right-output-enable;
+            };
+        };
+    };
+};
+

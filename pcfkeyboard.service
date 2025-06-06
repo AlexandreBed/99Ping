@@ -1,0 +1,13 @@
+[Unit]
+Description=pcf8574 to Keyboard Input
+After=multi-user.target startup.service
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/Desktop/99Ping/pcf_keyboard.py
+#Restart=always
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target
+
